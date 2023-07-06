@@ -14,8 +14,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -63,7 +66,7 @@ public class BoardMockingTest {
     }
     
     @Test
-    @DisplayName("Mocking: 게시물 리스트 테스트")
+    @DisplayName("Mocking: 게시물 리스트 보기 테스트")
     public void 게시물_리스트_보기 () {
         when(mockBoardRepository.findAll())
                 .thenReturn(Collections.emptyList());
@@ -72,5 +75,45 @@ public class BoardMockingTest {
         final List<JpaBoard> actual = sut.list();
 
         assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Mocking: 게시물 읽기 테스트")
+    public void 게시물_읽기 () {
+        JpaBoard board = new JpaBoard("제목목", "작성자자", "내용용");
+        RequestBoardForm boardForm = new RequestBoardForm("제목목", "내용용", "작성자자");
+
+        when(mockBoardRepository.findById(0L))
+                .thenReturn(Optional.of(new JpaBoard("제목목", "작성자자", "내용용")));
+
+        final JpaBoardServiceImpl sut = new JpaBoardServiceImpl(mockBoardRepository);
+
+        final JpaBoard actual = sut.read(0L);
+        System.out.println("mocking result: " + actual);
+
+        assertThat(mockBoardRepository.findById(0L).get()).isEqualTo(actual);
+    }
+
+    @Test
+    @DisplayName("Mocking: 게시물 수정 테스트")
+    public void 게시물_수정 () {
+        JpaBoard board = new JpaBoard("제목목", "작성자자", "내용용");
+        RequestBoardForm boardForm = new RequestBoardForm("제목목2", "내용용2", "작성자자2");
+
+        when(mockBoardRepository.findById(0L))
+                .thenReturn(Optional.of(new JpaBoard("제목목", "작성자자", "내용용")));
+
+        when(mockBoardRepository.save(any()))
+                .thenReturn(new JpaBoard("제목목2", "작성자자2", "내용용2"));
+
+        final JpaBoardServiceImpl sut = new JpaBoardServiceImpl(mockBoardRepository);
+
+        final JpaBoard actual = sut.modify(0L, boardForm);
+        System.out.println("mocking result: " + actual);
+
+        assertThat(mockBoardRepository.findById(0L).get().getTitle())
+                .isEqualTo(actual.getTitle());
+        assertThat(mockBoardRepository.findById(0L).get().getContent())
+                .isEqualTo(actual.getContent());
     }
 }
