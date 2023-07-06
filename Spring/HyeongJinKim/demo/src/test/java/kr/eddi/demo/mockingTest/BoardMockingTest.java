@@ -12,6 +12,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -57,5 +60,17 @@ public class BoardMockingTest {
         assertEquals(actual.getTitle(), board.getTitle());
         assertEquals(actual.getWriter(), board.getWriter());
         assertEquals(actual.getContent(), board.getContent());
+    }
+    
+    @Test
+    @DisplayName("Mocking: 게시물 리스트 테스트")
+    public void 게시물_리스트_보기 () {
+        when(mockBoardRepository.findAll())
+                .thenReturn(Collections.emptyList());
+
+        final JpaBoardServiceImpl sut = new JpaBoardServiceImpl(mockBoardRepository);
+        final List<JpaBoard> actual = sut.list();
+
+        assertTrue(actual.isEmpty());
     }
 }
